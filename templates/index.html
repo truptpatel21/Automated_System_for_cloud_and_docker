@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automation Tasks</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"> -->
+</head>
+<body>
+    <div class="container">
+        <h1>Automation Tasks</h1>
+        <form action="/submit" method="post">
+            <label for="automation_option">Choose an automation task:</label>
+            <select id="automation_option" name="automation_option">
+                <option value="">Select an Option</option>
+                <option value="docker">Create Docker Container</option>
+                <option value="terraform">Launch AWS EC2 Instance</option>
+                <option value="s3">Create AWS S3 Bucket </option>
+                <option value="lambda">Create AWS Lambda Function </option>
+                <option value="vpc">Create VPC </option>
+                <option value="jenkins">Jenkins Automation on CI/CD pipelines</option>
+            </select>
+            <br>
+
+            <div id="dockerInputs" style="display:none;">
+                <label for="docker_image_name">Docker Image Name:</label>
+                <input type="text" id="docker_image_name" name="docker_image_name">
+                
+                <label for="docker_container_name">Docker Container Name:</label>
+                <input type="text" id="docker_container_name" name="docker_container_name">
+            </div>
+
+            <button type="submit">Submit</button>
+        </form>
+        {% if result %}
+        <button id="resultButton">Result</button>
+        <div id="resultContainer" class="result" style="display:none;">
+            <h2>Result:</h2>
+            <pre>{{ result }}</pre>
+        </div>
+        {% endif %}
+    </div>
+    <script>
+        document.getElementById('automation_option').addEventListener('change', function() {
+            var dockerInputs = document.getElementById('dockerInputs');
+            if (this.value === 'docker') {
+                dockerInputs.style.display = 'block';
+            } else {
+                dockerInputs.style.display = 'none';
+            }
+        });
+
+        document.getElementById('resultButton').addEventListener('click', function() {
+            var resultContainer = document.getElementById('resultContainer');
+            if (resultContainer.style.display === 'none') {
+                resultContainer.style.display = 'block';
+            } else {
+                resultContainer.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
