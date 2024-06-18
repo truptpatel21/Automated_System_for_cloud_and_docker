@@ -1,68 +1,43 @@
 pipeline {
     agent any
-
-    environment {
-        // Define environment variables if necessary
-        VENV_DIR = 'venv'
-        APP_DIR = 'Automated System for cloud and Docker'
-    }
-
     stages {
         stage('Checkout') {
             steps {
-                // Checkout code from the repository
-                git url: 'https://github.com/truptpatel21/Automated_System_for_cloud_and_docker', branch: 'master'
+                git 'https://github.com/truptpatel21/Automated_System_for_cloud_and_docker.git'
             }
         }
-
         stage('Install Dependencies') {
             steps {
-                script {
-                    // Set up a Python virtual environment and install dependencies
-                    if (fileExists(VENV_DIR)) {
-                        sh "rm -rf ${VENV_DIR}"
-                    }
-                    sh "python3 -m venv ${VENV_DIR}"
-                    sh "${VENV_DIR}/bin/pip install -r ${APP_DIR}/requirements.txt"
-                }
+                // Ensure Python is in the PATH
+                bat 'python --version'
+                // Install required Python packages
+                bat 'pip install -r requirements.txt'
             }
         }
-
         stage('Run Tests') {
             steps {
-                script {
-                    // Run your tests
-                    sh "${VENV_DIR}/bin/python -m unittest discover ${APP_DIR}/tests"
-                }
+                // Run your test commands here
+                bat 'python -m unittest discover tests'
             }
         }
-
         stage('Build Docker Image') {
             steps {
-                script {
-                    // Build a Docker image if you are using Docker
-                    sh "docker build -t flask-automation-project ."
-                }
+                // Ensure Docker is installed and in the PATH
+                bat 'docker --version'
+                // Build Docker image
+                bat 'docker build -t flask-app .'
             }
         }
-
         stage('Deploy') {
             steps {
-                script {
-                    // Deploy your application
-                    // Add your deployment steps here
-                    echo "Deploying application..."
-                }
+                // Deployment steps
+                bat 'docker run -d -p 5000:5000 flask-app'
             }
         }
     }
-
     post {
         always {
-            cleanWs() // Clean workspace after the build
-        }
-        success {
-            echo 'Build succeeded!'
+            cleanWs()
         }
         failure {
             echo 'Build failed!'
