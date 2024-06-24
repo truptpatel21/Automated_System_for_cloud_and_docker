@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 resource "aws_lambda_function" "example_lambda" {
-  function_name = "tp_lambda"
+  function_name = "tp_lambda1"
   role          = aws_iam_role.lambda_exec.arn
   handler       = "lambda_function.lambda_handler"
   runtime       = "python3.8"
