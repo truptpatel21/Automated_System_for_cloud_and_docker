@@ -1,52 +1,42 @@
 pipeline {
     agent any
-
+    parameters {
+        choice(name: 'RESOURCE_TYPE', choices: ['ec2', 's3', 'lambda', 'vpc'], description: 'Select the AWS resource to create')
+    }
+    environment {
+        AWS_CREDENTIALS_ID = 'b6493d48-501b-4e5a-81f4-ff3b0a3babce'  // Replace with your actual AWS_CREDENTIALS_ID
+        GIT_REPO_URL = 'https://github.com/truptpatel21/Automated_System_for_cloud_and_docker.git'
+        TERRAFORM_DIR = 'TerraformInstance'
+    }
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/truptpatel21/Automated_System_for_cloud_and_docker.git'
+                git credentialsId: 'your-github-credentials-id', url: "${env.GIT_REPO_URL}"
             }
         }
-        stage('Install Dependencies') {
+        stage('Terraform Init') {
             steps {
-                script {
-                    if (isUnix()) {
-                        sh 'pip install -r requirements.txt'
-                    } else {
-                        bat 'pip install -r requirements.txt'
+                dir("${env.TERRAFORM_DIR}/${params.RESOURCE_TYPE}") {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: "${env.AWS_CREDENTIALS_ID}"]]) {
+                        sh 'terraform init'
                     }
                 }
             }
         }
-        stage('Run Tests') {
+        stage('Terraform Plan') {
             steps {
-                script {
-                    if (isUnix()) {
-                        sh 'python -m unittest discover'
-                    } else {
-                        bat 'python -m unittest discover'
+                dir("${env.TERRAFORM_DIR}/${params.RESOURCE_TYPE}") {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: "${env.AWS_CREDENTIALS_ID}"]]) {
+                        sh 'terraform plan'
                     }
                 }
             }
         }
-        stage('Build Docker Image') {
+        stage('Terraform Apply') {
             steps {
-                script {
-                    if (isUnix()) {
-                        sh 'docker build -t flask_app .'
-                    } else {
-                        bat 'docker build -t flask_app .'
-                    }
-                }
-            }
-        }
-        stage('Deploy') {
-            steps {
-                script {
-                    if (isUnix()) {
-                        sh 'docker run -d -p 5000:5000 flask_app'
-                    } else {
-                        bat 'docker run -d -p 5000:5000 flask_app'
+                dir("${env.TERRAFORM_DIR}/${params.RESOURCE_TYPE}") {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: "${env.AWS_CREDENTIALS_ID}"]]) {
+                        sh 'terraform apply -auto-approve'
                     }
                 }
             }
@@ -55,12 +45,6 @@ pipeline {
     post {
         always {
             cleanWs()
-        }
-        success {
-            echo 'Build completed successfully!'
-        }
-        failure {
-            echo 'Build failed!'
         }
     }
 }
