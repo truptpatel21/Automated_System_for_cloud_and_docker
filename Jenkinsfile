@@ -4,7 +4,7 @@ pipeline {
         choice(name: 'RESOURCE_TYPE', choices: ['ec2', 's3', 'lambda', 'vpc'], description: 'Select the AWS resource to create')
     }
     environment {
-        AWS_CREDENTIALS_ID = 'b6493d48-501b-4e5a-81f4-ff3b0a3babce'
+        AWS_CREDENTIALS_ID = 'aws-credentials-id'  // Make sure this ID matches the one you set in Jenkins
         GIT_CREDENTIALS_ID = 'github-credentials-id'
         GIT_REPO_URL = 'https://github.com/truptpatel21/Automated_System_for_cloud_and_docker.git'
         TERRAFORM_DIR = 'TerraformInstance'
